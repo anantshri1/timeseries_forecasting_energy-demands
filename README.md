@@ -172,6 +172,7 @@ Historical temperature data were collected using the Open-Meteo API for five geo
 * Chennai
 * Kolkata
 * Guwahati
+
 These locations were selected to capture climatic variation across major demand regions of the Indian grid.
 
 To capture the non-linear relationship between temperature and electricity demand, raw temperature observations were transformed into weather-derived demand indicators.
@@ -220,4 +221,47 @@ Model 3 (XGBoost + Regional Demand) and Model 5 (XGBoost + Regional + Raw Weathe
 * Model 5 (XGBoost + Regional + Raw Weather): MAPE: 3.92%
 
 <img width="1118" height="467" alt="Screenshot 2026-06-02 at 4 05 31 PM" src="https://github.com/user-attachments/assets/865e5e81-3aba-468c-9edf-dd1fca1b1785" />
+
+---
+# Scenario Aware Modelling
+
+Initially, the model solves a conventional supervised learning problem: $Demand_{t+24} = f(X_t)$, where $X_t$ contains current demand, regional demand, lag features, rolling statisitcs, weather variables, and calendar features. The model produces a single 24-hour-ahead forecast.
+
+However, the model has no mechanism for evolving demand under alternative future conditions, since it only predicts one step ahead using historical observations.
+
+To address this, a recursive simulation engine was developed by feeding model predictions back into lag and rolling-window features at each timestep. This transformed the forecasting model into a simplified demand simulator capable of generating multi-day trajectories under alternative climate scenarios, enabling stress-testing of electricity demand under sustained heatwave and coldwave conditions. Instead of producing a single forecast:
+1. Predict future demand.
+2. Feed the prediction back into the system.
+3. Recompute lag and rolling-window features.
+4. Predict the next timestep.
+5. Repeat.
+
+Because temperature is explicitly represented in the feature set of Model 5 (XGBoost + Regional + Raw Weather), weather conditions can be perturbed before simulation.
+
+Scenarios considered included:
+| Scenario        | Temperature Shift |
+| --------------- | ----------------- |
+| Baseline        | 0°C               |
+| Mild Heatwave   | +2°C              |
+| Severe Heatwave | +4°C              |
+| Mild Coldwave   | -2°C              |
+| Severe Coldwave | -4°C              |
+
+* **Heatwave Scenario**: The energy demand forecast is shown below:
+
+<img width="1027" height="469" alt="Screenshot 2026-06-02 at 4 16 05 PM" src="https://github.com/user-attachments/assets/35d6f700-32a5-4aa8-a392-cdc344822c3e" />
+
+with comparisons against the baseline:
+
+<img width="1004" height="373" alt="Screenshot 2026-06-02 at 4 16 22 PM" src="https://github.com/user-attachments/assets/2d8295ba-4bd6-4fe2-bb0a-63d2cbc44987" />
+
+* **Coldwave Scenario**: The energy demand forecast is shown below:
+
+<img width="1032" height="470" alt="Screenshot 2026-06-02 at 4 16 39 PM" src="https://github.com/user-attachments/assets/01759718-02a5-4ff4-9e11-eb00e6b9c03e" />
+
+with comparisons against the baseline:
+
+<img width="1018" height="373" alt="Screenshot 2026-06-02 at 4 16 54 PM" src="https://github.com/user-attachments/assets/699479d3-b817-439d-92d7-1cfba4cf94ed" />
+
+
 
