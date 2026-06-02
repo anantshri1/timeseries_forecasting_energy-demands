@@ -144,3 +144,26 @@ Despite requiring no training or feature engineering, the persistence baseline a
 
 The strong performance of this benchmark, together with ACF/PACF analysis, suggests that daily and weekly seasonality dominate short-horizon forecasting performance. Consequently, autoregressive lag features (`lag_1`, `lag_24`, `lag_168`) and rolling-window statistics formed the foundation of subsequent machine learning models.
 
+### Model Development and Feature Ablation
+To understand the contribution of different feature groups, a sequence of XGBoost models was trained with progressively richer information sources.
+
+| Model                                          | Key Features Added                                                                    | Validation MAPE |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- | --------------- |
+| Persistence Baseline                           | Demand(t) → Demand(t+24)                                                              | **2.66%**       |
+| XGBoost Baseline                               | National demand, temporal features, lag features, rolling statistics                  | **2.66%**       |
+| XGBoost w/o National Demand                    | Temporal features, lag features, rolling statistics                                   | **2.87%**       |
+| XGBoost + Regional Demand                      | National demand, regional demand, temporal features, lag features, rolling statistics | **2.59%**       |
+| XGBoost + Regional Demand (No National Demand) | Regional demand, temporal features, lag features, rolling statistics                  | **2.70%**       |
+
+**Key findings**
+* Removing the national demand signal degraded performance from 2.66% to 2.87% MAPE, indicating that the current system state contains substantial information about future demand.
+* Adding regional demand variables improved performance from 2.66% to 2.59% MAPE. This suggests that regional load patterns contain information not fully captured by aggregate national demand alone. The result aligns with exploratory analysis, which identified distinct demand regimes across Indian regions, and was confirmed by SHAP analysis:
+
+<img width="789" height="729" alt="Screenshot 2026-06-02 at 3 48 20 PM" src="https://github.com/user-attachments/assets/bd19e045-be79-489e-aa77-b490724ab965" />
+
+* When national demand was removed entirely, the model using only regional demand achieved 2.70% MAPE, substantially outperforming the model without either national or regional demand (2.87% MAPE). This indicates that regional demand signals retain much of the information contained within aggregate demand and can serve as an effective proxy for system-wide conditions.
+* Machine learning and additional feature sets provide meaningful improvements, but most predictive power originates from the underlying temporal structure of the demand series.
+
+### Feature Engineering: 
+
+
