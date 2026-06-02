@@ -246,6 +246,7 @@ Scenarios considered included:
 | Severe Heatwave | +4°C              |
 | Mild Coldwave   | -2°C              |
 | Severe Coldwave | -4°C              |
+> Predicted national demand is recursively fed back into autoregressive features and rolling statistics, while regional demand trajectories are held fixed at their baseline values. The simulation therefore captures feedback through national demand persistence but does not model dynamic interactions between regions.
 
 * **Heatwave Scenario**: The energy demand forecast is shown below:
 
@@ -263,5 +264,19 @@ with comparisons against the baseline:
 
 <img width="1018" height="373" alt="Screenshot 2026-06-02 at 4 16 54 PM" src="https://github.com/user-attachments/assets/699479d3-b817-439d-92d7-1cfba4cf94ed" />
 
+---
+# Limitations
+
+* Strong Dependence on Historical Persistence: The forecasting models derive most of their predictive power from demand persistence and seasonal structure. While this produces strong short-term accuracy, it also means the models are primarily learning historical demand behaviour rather than underlying causal drivers. As a result, performance may deteriorate when demand patterns change significantly.
+
+* Evidence of Regime Shifts: Model performance was substantially stronger on the validation period than on the 2024 holdout period. This suggests the presence of non-stationary demand dynamics and regime shifts that are not fully captured by historical training data.
+
+* Limited Exogenous Variables: The current framework incorporates temperature as the primary external driver. However, electricity demand is also influenced by factors such as economic activity, industrial production, public holidays, policy changes, and electrification trends. These variables were not included and may explain part of the performance degradation observed in later periods.
+
+* Simplified Weather Representation: Weather conditions were represented using a small set of city-level temperature series and derived HDD/CDD indicators. While sufficient for exploratory modelling, a more comprehensive treatment could incorporate humidity, wind speed, precipitation etc.
+
+* Recursive Forecast Error Accumulation: The scenario simulator generates multi-day forecasts by recursively feeding model predictions back into lag and rolling-window features. This introduces error accumulation; as the forecast horizon increases, small prediction errors can propagate and amplify. For this reason, scenario results should be interpreted as exploratory stress tests rather than precise long-range forecasts.
+
+* Simplified Regional Dynamics: The current scenario framework recursively updates only national demand features. Regional demand variables are treated as exogenous inputs and are not evolved through time. A more complete framework would jointly forecast regional and national demand, allowing temperature shocks to propagate through regional demand dynamics before aggregating to the national level.
 
 
