@@ -69,11 +69,6 @@ with the following emergent seasonal trends:
 | North-Eastern | August–September     | April / December    |
 
 
-Exploratory analysis further revealed two distinct demand clusters within India:
-
-* North, East and North-East regions exhibit evening demand peaks (~19:00)
-* South and West regions exhibit daytime demand peaks (~10–11:00)
-
 This suggests heterogeneous demand drivers across regions and motivated the inclusion of regional demand signals in forecasting models. Regional correlations were confirmed by plotting a heatmap, shown below:
 
 <img width="765" height="677" alt="Screenshot 2026-06-02 at 3 23 02 PM" src="https://github.com/user-attachments/assets/ce602b68-23dd-4e50-a971-2250600e704d" />
@@ -145,7 +140,7 @@ Despite requiring no training or feature engineering, the persistence baseline a
 The strong performance of this benchmark, together with ACF/PACF analysis, suggests that daily and weekly seasonality dominate short-horizon forecasting performance. Consequently, autoregressive lag features (`lag_1`, `lag_24`, `lag_168`) and rolling-window statistics formed the foundation of subsequent machine learning models.
 
 ### Model Development and Feature Ablation
-To understand the contribution of different feature groups, a sequence of XGBoost models was trained with progressively richer information sources.
+To understand which information sources contribute most to predictive performance, a sequence of ablation experiments was performed in which feature groups were progressively added and removed.
 
 | Model                                          | Key Features Added                                                                    | Validation MAPE |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------- | --------------- |
@@ -178,7 +173,7 @@ These locations were selected to capture climatic variation across major demand 
 To capture the non-linear relationship between temperature and electricity demand, raw temperature observations were transformed into weather-derived demand indicators.
 
 * **Cooling Degree Days (CDD)**: Cooling Degree Days ($CDD = max(T-T_{base},0)$) measure the extent to which temperatures exceed a reference comfort threshold. CDD acts as a proxy for cooling demand arising from air-conditioning usage during hot weather.
-* **Heating Degree Days (HDD)**: Heating Degree Days ($HDD = max(T_{base}=T,0)$) measure the extent to which temperatures fall below the reference threshold. HDD captures additional electricity demand associated with heating requirements during colder conditions.
+* **Heating Degree Days (HDD)**: Heating Degree Days ($HDD = max(T_{base}-T,0)$) measure the extent to which temperatures fall below the reference threshold. HDD captures additional electricity demand associated with heating requirements during colder conditions.
 * **Non-Linear Temperature Effects**: Electricity demand often increases disproportionately during extreme temperatures. To capture this behaviour, a quadratic cooling term $CDD^2$ was introduced. This allows the model to represent accelerating demand growth during severe heat events, where cooling loads increase non-linearly.
 
 HDD, CDD and CDD² allow the model to learn these asymmetric and non-linear responses directly.
@@ -279,4 +274,6 @@ with comparisons against the baseline:
 
 * Simplified Regional Dynamics: The current scenario framework recursively updates only national demand features. Regional demand variables are treated as exogenous inputs and are not evolved through time. A more complete framework would jointly forecast regional and national demand, allowing temperature shocks to propagate through regional demand dynamics before aggregating to the national level.
 
-
+---
+# Conclusion
+This project demonstrates that short-term electricity demand forecasting in India is primarily driven by persistence and system-state variables. While machine learning provides incremental improvements over strong benchmark methods, the greatest opportunities for future development lie in regime-aware forecasting, richer exogenous data integration, and scenario-based energy system analysis. By extending conventional forecasting models into a recursive simulation framework, the project illustrates how machine learning can support both operational forecasting and exploratory climate stress testing.
