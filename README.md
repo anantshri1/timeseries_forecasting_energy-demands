@@ -189,10 +189,10 @@ To investigate the contribution of weather information, several feature represen
 
 | Model                                 | Weather Representation              | Validation MAPE |
 | ------------------------------------- | ----------------------------------- | --------------- |
-| Regional + Raw Weather                | City-level temperatures             | **2.75%**       |
-| Regional + Engineered Weather         | HDD, CDD, CDD², regional aggregates | **2.85%**       |
-| Regional + Aggregate Weather Features | India-wide HDD, CDD, CDD²           | **2.82%**       |
-| Full Feature Diagnostics              | Extended weather feature set        | **2.83%**       |
+| XGBoost + Regional + Raw Weather                | City-level temperatures             | **2.75%**       |
+| XGBoost + Regional + Engineered Weather         | HDD, CDD, CDD², regional aggregates | **2.85%**       |
+| XGBoost + Regional + Aggregate Weather Features | India-wide HDD, CDD, CDD²           | **2.82%**       |
+| XGBoost + Full Feature Diagnostics              | Extended weather feature set        | **2.83%**       |
 
 > Note: we replace temporal signals with periodic variables here.
 
@@ -205,4 +205,19 @@ A notable outcome of this study is that increasingly sophisticated weather featu
 
 However, weather features remain essential for understanding demand sensitivity and enabling climate-aware scenario analysis, making them valuable despite their modest contribution to pure forecasting performance.
 
+---
+
+## Summary and Diagnostics
+While validation performance remained strong, forecast accuracy deteriorated on the 2024 holdout period. This suggests the presence of regime shifts and evolving demand dynamics not fully represented in the training data. The result highlights a key challenge of real-world energy forecasting: models must operate in environments where consumption patterns change over time.
+
+Model 3 (XGBoost + Regional Demand) and Model 5 (XGBoost + Regional + Raw Weather) were used to forecast energy demands for the 2024 holdout period. The results are shown below:
+
+* Model 3 (XGBoost + Regional Demand): MAPE: 3.87%
+
+<img width="1105" height="469" alt="Screenshot 2026-06-02 at 4 05 13 PM" src="https://github.com/user-attachments/assets/1d7b593e-24d1-4b0a-82d8-70085683be4f" />
+
+
+* Model 5 (XGBoost + Regional + Raw Weather): MAPE: 3.92%
+
+<img width="1118" height="467" alt="Screenshot 2026-06-02 at 4 05 31 PM" src="https://github.com/user-attachments/assets/865e5e81-3aba-468c-9edf-dd1fca1b1785" />
 
