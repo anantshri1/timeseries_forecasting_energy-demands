@@ -164,6 +164,45 @@ To understand the contribution of different feature groups, a sequence of XGBoos
 * When national demand was removed entirely, the model using only regional demand achieved 2.70% MAPE, substantially outperforming the model without either national or regional demand (2.87% MAPE). This indicates that regional demand signals retain much of the information contained within aggregate demand and can serve as an effective proxy for system-wide conditions.
 * Machine learning and additional feature sets provide meaningful improvements, but most predictive power originates from the underlying temporal structure of the demand series.
 
-### Feature Engineering: 
+### Weather Feature Engineering
+
+Historical temperature data were collected using the Open-Meteo API for five geographically distributed Indian cities:
+* Delhi
+* Mumbai
+* Chennai
+* Kolkata
+* Guwahati
+These locations were selected to capture climatic variation across major demand regions of the Indian grid.
+
+To capture the non-linear relationship between temperature and electricity demand, raw temperature observations were transformed into weather-derived demand indicators.
+
+* **Cooling Degree Days (CDD)**: Cooling Degree Days ($CDD = max(T-T_{base},0)$) measure the extent to which temperatures exceed a reference comfort threshold. CDD acts as a proxy for cooling demand arising from air-conditioning usage during hot weather.
+* **Heating Degree Days (HDD)**: Heating Degree Days ($HDD = max(T_{base}=T,0)$) measure the extent to which temperatures fall below the reference threshold. HDD captures additional electricity demand associated with heating requirements during colder conditions.
+* **Non-Linear Temperature Effects**: Electricity demand often increases disproportionately during extreme temperatures. To capture this behaviour, a quadratic cooling term $CDD^2$ was introduced. This allows the model to represent accelerating demand growth during severe heat events, where cooling loads increase non-linearly.
+
+HDD, CDD and CDD² allow the model to learn these asymmetric and non-linear responses directly.
+
+Weather-derived features improved model interpretability and provided a physically meaningful representation of temperature sensitivity. While persistence and system-state variables remain the dominant drivers of forecasting performance, HDD/CDD features enabled the model to explicitly capture demand responses to temperature extremes.
+
+### Further Modelling
+To investigate the contribution of weather information, several feature representations were evaluated ranging from raw temperature observations to physically motivated demand indicators based on Heating Degree Days (HDD) and Cooling Degree Days (CDD).
+
+| Model                                 | Weather Representation              | Validation MAPE |
+| ------------------------------------- | ----------------------------------- | --------------- |
+| Regional + Raw Weather                | City-level temperatures             | **2.75%**       |
+| Regional + Engineered Weather         | HDD, CDD, CDD², regional aggregates | **2.85%**       |
+| Regional + Aggregate Weather Features | India-wide HDD, CDD, CDD²           | **2.82%**       |
+| Full Feature Diagnostics              | Extended weather feature set        | **2.83%**       |
+
+> Note: we replace temporal signals with periodic variables here.
+
+**Key findings**
+* The strongest weather-enhanced model used raw city-level temperature observations directly and achieved a validation MAPE of 2.75%. Surprisingly, replacing these variables with engineered HDD/CDD-based features led to a small deterioration in performance. This suggests that the gradient-boosted tree model was able to learn temperature-demand relationships directly from raw temperature observations without requiring extensive feature transformation.
+* Weather variables provide additional context but do not fundamentally alter predictability at a 24-hour forecasting horizon.
+* Although HDD/CDD-based models did not outperform raw temperatures, they remain valuable from an energy systems perspective.
+
+A notable outcome of this study is that increasingly sophisticated weather features did not produce commensurate improvements in forecasting accuracy. This suggests that short-term electricity demand forecasting in India is largely governed by persistence and system-state variables, with weather acting as a secondary modifier rather than a primary driver.
+
+However, weather features remain essential for understanding demand sensitivity and enabling climate-aware scenario analysis, making them valuable despite their modest contribution to pure forecasting performance.
 
 
