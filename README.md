@@ -100,7 +100,7 @@ These patterns indicate:
   2. Demand this week resembles demand last week
   3. Daily and weekly seasonality are major drivers of electricity consumption
 
-* The PACF measures the correlation between $y_t$ and $y_{t-k} after removing the effects of intermediate lags. The PACF plot is shown below:
+* The PACF measures the correlation between $y_t$ and $y_{t-k}$ after removing the effects of intermediate lags. The PACF plot is shown below:
 
   <img width="570" height="433" alt="Screenshot 2026-06-02 at 3 29 06 PM" src="https://github.com/user-attachments/assets/f5b091b7-6914-4501-9f04-1b474ae69795" />
 
